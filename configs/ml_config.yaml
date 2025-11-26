@@ -1,0 +1,402 @@
+# QuantX ML Configuration
+# All settings can be overridden via environment variables or runtime config
+
+# ============================================================================
+# COMPUTE RESOURCES - Flexible GPU/CPU configuration
+# ============================================================================
+compute:
+  # Device selection: "auto", "cpu", "cuda", "mps" (Apple Silicon)
+  # "auto" will automatically detect and use best available device
+  device: "auto"
+  
+  # Number of CPU cores for parallel processing
+  # Set to -1 to use all available cores, or specify exact number
+  n_jobs: -1
+  
+  # Memory limits (in GB) - helps prevent OOM errors
+  max_memory_gb: 8
+  
+  # Batch size for training (adjust based on available memory)
+  batch_size: 32
+  
+  # Enable mixed precision training (faster on modern GPUs)
+  mixed_precision: false
+
+# ============================================================================
+# MLFLOW CONFIGURATION - Flexible tracking backend
+# ============================================================================
+mlflow:
+  # Tracking URI options:
+  # - "local": file:./mlruns (local filesystem)
+  # - "sqlite": sqlite:///mlruns.db (local SQLite)
+  # - "postgresql": postgresql://user:pass@host:port/db (PostgreSQL)
+  # - "http://mlflow-server:5000" (remote MLflow server)
+  # - "databricks" (Databricks workspace)
+  tracking_uri: "local"
+  
+  # Experiment name (can be changed per run)
+  experiment_name: "quantx_trading"
+  
+  # Artifact storage location
+  # Options: "local", "s3://bucket/path", "gs://bucket/path", "azure://..."
+  artifact_location: "local"
+  
+  # Model registry URI (can be different from tracking)
+  registry_uri: null  # null means use tracking_uri
+  
+  # Enable autologging for supported frameworks
+  autolog:
+    sklearn: true
+    xgboost: true
+    lightgbm: true
+    pytorch: true
+
+# ============================================================================
+# DATA SOURCES - Pluggable data providers
+# ============================================================================
+data_sources:
+  # Primary data provider (can be changed at runtime)
+  # Options: "yahoo", "alpha_vantage", "polygon", "binance", "custom"
+  primary_provider: "yahoo"
+  
+  # Fallback providers (tried in order if primary fails)
+  fallback_providers:
+    - "alpha_vantage"
+  
+  # Provider-specific configurations
+  providers:
+    yahoo:
+      enabled: true
+      cache_enabled: true
+      cache_ttl_hours: 24
+      rate_limit_per_minute: 60
+      
+    alpha_vantage:
+      enabled: false
+      api_key: "${ALPHA_VANTAGE_API_KEY}"  # From environment
+      cache_enabled: true
+      premium: false
+      
+    polygon:
+      enabled: false
+      api_key: "${POLYGON_API_KEY}"
+      tier: "free"  # "free", "starter", "developer", "advanced"
+      
+    binance:
+      enabled: false
+      api_key: "${BINANCE_API_KEY}"
+      api_secret: "${BINANCE_API_SECRET}"
+      testnet: true
+      
+  # Data storage backend (can be changed)
+  # Options: "memory", "sqlite", "postgresql", "timescaledb", "parquet", "hdf5"
+  storage_backend: "sqlite"
+  
+  storage_config:
+    sqlite:
+      path: "./data/market_data.db"
+    postgresql:
+      host: "${DB_HOST:localhost}"
+      port: 5432
+      database: "quantx"
+      user: "${DB_USER}"
+      password: "${DB_PASSWORD}"
+
+# ============================================================================
+# FEATURE ENGINEERING - Modular feature configuration
+# ============================================================================
+feature_engineering:
+  # Enable/disable feature groups
+  enabled_features:
+    technical: true
+    statistical: true
+    market_microstructure: false  # Requires order book data
+    sentiment: false  # Requires news/social data
+    fundamental: false  # Requires financial statements
+    
+  # Technical indicators configuration
+  technical:
+    # Lookback periods for moving averages
+    ma_periods: [5, 10, 20, 50, 100, 200]
+    
+    # RSI periods
+    rsi_periods: [14, 21]
+    
+    # Bollinger Bands
+    bb_periods: [20]
+    bb_std: [2, 2.5]
+    
+    # MACD
+    macd_fast: 12
+    macd_slow: 26
+    macd_signal: 9
+    
+  # Statistical features
+  statistical:
+    return_periods: [1, 5, 10, 20]
+    rolling_windows: [5, 10, 20, 50]
+    
+  # Feature selection
+  feature_selection:
+    enabled: true
+    method: "mutual_info"  # "correlation", "mutual_info", "rfe", "lasso", "tree"
+    max_features: 50
+    min_importance: 0.01
+
+# ============================================================================
+# MODEL CONFIGURATION - Flexible model selection
+# ============================================================================
+models:
+  # Available model types (can be enabled/disabled)
+  available_models:
+    - "random_forest"
+    - "xgboost"
+    - "lightgbm"
+    - "catboost"
+    - "lstm"
+    - "gru"
+    - "transformer"
+    - "dqn"
+    - "ppo"
+    
+  # Default model for training (can be overridden)
+  default_model: "xgboost"
+  
+  # Model-specific configurations
+  random_forest:
+    n_estimators: 100
+    max_depth: 10
+    min_samples_split: 5
+    n_jobs: -1
+    
+  xgboost:
+    n_estimators: 100
+    max_depth: 6
+    learning_rate: 0.1
+    subsample: 0.8
+    colsample_bytree: 0.8
+    tree_method: "auto"  # "auto", "gpu_hist", "hist"
+    
+  lightgbm:
+    n_estimators: 100
+    max_depth: 6
+    learning_rate: 0.1
+    num_leaves: 31
+    device: "cpu"  # "cpu", "gpu", "cuda"
+    
+  catboost:
+    iterations: 100
+    depth: 6
+    learning_rate: 0.1
+    task_type: "CPU"  # "CPU", "GPU"
+    
+  lstm:
+    hidden_size: 128
+    num_layers: 2
+    dropout: 0.2
+    bidirectional: false
+    sequence_length: 60
+    
+  transformer:
+    d_model: 128
+    nhead: 8
+    num_layers: 4
+    dropout: 0.1
+    sequence_length: 60
+
+# ============================================================================
+# TRAINING CONFIGURATION - Flexible training pipeline
+# ============================================================================
+training:
+  # Target variable options
+  # "next_return": Next period return
+  # "direction": Up/Down/Neutral classification
+  # "volatility": Volatility prediction
+  target: "direction"
+  
+  # Train/validation/test split
+  train_split: 0.7
+  val_split: 0.15
+  test_split: 0.15
+  
+  # Validation method
+  # Options: "holdout", "kfold", "timeseries_cv", "walk_forward", "purged_kfold"
+  validation_method: "walk_forward"
+  
+  # Cross-validation folds (if applicable)
+  n_folds: 5
+  
+  # Random seed for reproducibility
+  random_seed: 42
+  
+  # Early stopping
+  early_stopping:
+    enabled: true
+    patience: 10
+    min_delta: 0.001
+    
+  # Model checkpointing
+  checkpointing:
+    enabled: true
+    save_best_only: true
+    monitor: "val_loss"
+    mode: "min"
+
+# ============================================================================
+# HYPERPARAMETER OPTIMIZATION - Flexible tuning
+# ============================================================================
+hyperparameter_tuning:
+  # Enable/disable hyperparameter optimization
+  enabled: false
+  
+  # Optimization method
+  # Options: "grid", "random", "bayesian", "optuna", "hyperband"
+  method: "optuna"
+  
+  # Number of trials
+  n_trials: 100
+  
+  # Timeout (in seconds)
+  timeout: 3600
+  
+  # Pruning (early stopping for unpromising trials)
+  pruning:
+    enabled: true
+    
+  # Parallel execution
+  n_jobs: 1  # Increase for parallel trials
+  
+  # Optuna-specific settings
+  optuna:
+    sampler: "TPE"  # "TPE", "Random", "Grid", "CmaEs"
+    pruner: "Median"  # "Median", "Hyperband", "Percentile"
+
+# ============================================================================
+# BROKER CONFIGURATION - Pluggable broker backends
+# ============================================================================
+brokers:
+  # Active broker (can be changed at runtime)
+  # Options: "paper", "zerodha", "interactive_brokers", "binance", "alpaca"
+  active_broker: "paper"
+  
+  # Paper trading (simulation)
+  paper:
+    initial_capital: 100000
+    commission: 0.001  # 0.1%
+    slippage: 0.0005  # 0.05%
+    
+  # Zerodha (India)
+  zerodha:
+    enabled: false
+    api_key: "${ZERODHA_API_KEY}"
+    api_secret: "${ZERODHA_API_SECRET}"
+    user_id: "${ZERODHA_USER_ID}"
+    password: "${ZERODHA_PASSWORD}"
+    totp_secret: "${ZERODHA_TOTP_SECRET}"
+    
+  # Interactive Brokers
+  interactive_brokers:
+    enabled: false
+    host: "127.0.0.1"
+    port: 7497  # 7497 for paper, 7496 for live
+    client_id: 1
+    
+  # Binance (Crypto)
+  binance:
+    enabled: false
+    api_key: "${BINANCE_API_KEY}"
+    api_secret: "${BINANCE_API_SECRET}"
+    testnet: true
+    
+  # Alpaca (US Stocks)
+  alpaca:
+    enabled: false
+    api_key: "${ALPACA_API_KEY}"
+    api_secret: "${ALPACA_API_SECRET}"
+    base_url: "https://paper-api.alpaca.markets"  # Paper trading
+
+# ============================================================================
+# STRATEGY CONFIGURATION - Runtime strategy selection
+# ============================================================================
+strategies:
+  # Active strategies (can run multiple)
+  active_strategies:
+    - "ma_crossover"
+    
+  # Strategy-specific configurations
+  ma_crossover:
+    fast_period: 50
+    slow_period: 200
+    
+  ml_classifier:
+    model_name: "xgboost_v1"
+    threshold: 0.6
+    rebalance_frequency: "daily"
+    
+  lstm_predictor:
+    model_name: "lstm_v1"
+    prediction_horizon: 5
+    confidence_threshold: 0.7
+    
+  rl_agent:
+    model_name: "ppo_v1"
+    action_space: "continuous"
+    risk_aversion: 0.5
+
+# ============================================================================
+# DEPLOYMENT CONFIGURATION - Environment-specific settings
+# ============================================================================
+deployment:
+  # Environment: "development", "staging", "production"
+  environment: "development"
+  
+  # Cloud provider (if using cloud resources)
+  # Options: "local", "aws", "gcp", "azure", "databricks"
+  cloud_provider: "local"
+  
+  # AWS-specific settings
+  aws:
+    region: "us-east-1"
+    s3_bucket: "${AWS_S3_BUCKET}"
+    ec2_instance_type: "t3.medium"  # Can upgrade to GPU instances
+    sagemaker_enabled: false
+    
+  # GCP-specific settings
+  gcp:
+    project_id: "${GCP_PROJECT_ID}"
+    region: "us-central1"
+    gcs_bucket: "${GCS_BUCKET}"
+    compute_instance_type: "n1-standard-4"
+    
+  # Azure-specific settings
+  azure:
+    subscription_id: "${AZURE_SUBSCRIPTION_ID}"
+    resource_group: "${AZURE_RESOURCE_GROUP}"
+    storage_account: "${AZURE_STORAGE_ACCOUNT}"
+
+# ============================================================================
+# MONITORING & LOGGING
+# ============================================================================
+monitoring:
+  # Enable performance monitoring
+  enabled: true
+  
+  # Metrics to track
+  track_metrics:
+    - "training_time"
+    - "inference_time"
+    - "memory_usage"
+    - "gpu_utilization"
+    
+  # Alerting (future)
+  alerting:
+    enabled: false
+    channels: ["email", "slack"]
+
+# ============================================================================
+# NOTES
+# ============================================================================
+# - All ${VAR} values are read from environment variables
+# - Settings can be overridden at runtime via Python API
+# - Use environment-specific config files: ml_config.dev.yaml, ml_config.prod.yaml
+# - See docs/configuration.md for detailed documentation
