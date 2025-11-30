@@ -21,3 +21,7 @@ pyyaml>=6.0.1
 
 # Backtesting and Analysis
 matplotlib>=3.8.0
+
+# Machine Learning (Phase 2)
+scipy>=1.11.0
+scikit-learn>=1.3.0
