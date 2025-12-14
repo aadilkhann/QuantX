@@ -39,6 +39,15 @@ from quantx.ml.models.traditional import (
     create_model
 )
 
+# Deep learning models (optional, requires PyTorch)
+try:
+    from quantx.ml.models.deep_learning import LSTMModel, GRUModel
+    DEEP_LEARNING_AVAILABLE = True
+except ImportError:
+    DEEP_LEARNING_AVAILABLE = False
+    LSTMModel = None
+    GRUModel = None
+
 __all__ = [
     # Base classes
     "BaseModel",
@@ -51,6 +60,10 @@ __all__ = [
     "XGBoostModel",
     "LightGBMModel",
     "RandomForestModel",
+    
+    # Deep learning models
+    "LSTMModel",
+    "GRUModel",
     
     # Factory
     "create_model",
