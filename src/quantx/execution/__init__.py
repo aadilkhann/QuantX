@@ -17,6 +17,19 @@ from quantx.execution.brokers import (
     PaperBroker
 )
 
+from quantx.execution.orders import (
+    OrderValidator,
+    OrderManager,
+    MultiOrderManager
+)
+
+from quantx.execution.risk import (
+    RiskLevel,
+    RiskLimits,
+    RiskViolation,
+    RiskManager
+)
+
 __all__ = [
     # Broker interface
     "IBroker",
@@ -35,4 +48,15 @@ __all__ = [
     
     # Implementations
     "PaperBroker",
+    
+    # Order Management
+    "OrderValidator",
+    "OrderManager",
+    "MultiOrderManager",
+    
+    # Risk Management
+    "RiskLevel",
+    "RiskLimits",
+    "RiskViolation",
+    "RiskManager",
 ]
