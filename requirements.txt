@@ -38,3 +38,7 @@ mlflow>=2.8.0
 
 # Optional: Advanced features
 tensorboard>=2.14.0
+
+# Broker Integration (Phase 3)
+kiteconnect>=4.0.0  # Zerodha Kite Connect API
+

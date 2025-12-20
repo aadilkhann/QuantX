@@ -18,6 +18,7 @@ from quantx.execution.brokers.base import (
 )
 
 from quantx.execution.brokers.paper_broker import PaperBroker
+from quantx.execution.brokers.zerodha_broker import ZerodhaBroker
 
 __all__ = [
     # Base classes
@@ -38,4 +39,5 @@ __all__ = [
     
     # Broker implementations
     "PaperBroker",
+    "ZerodhaBroker",
 ]

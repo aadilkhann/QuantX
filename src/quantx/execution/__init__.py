@@ -30,6 +30,26 @@ from quantx.execution.risk import (
     RiskManager
 )
 
+# Live Trading Components
+from quantx.execution.live_engine import (
+    LiveExecutionEngine,
+    EngineState,
+    EngineConfig
+)
+
+from quantx.execution.position_sync import (
+    PositionSynchronizer,
+    PositionDiscrepancy,
+    ReconciliationReport
+)
+
+from quantx.execution.live_pnl import (
+    LivePnLTracker,
+    TradeRecord,
+    DailyPnL,
+    LivePnLSnapshot
+)
+
 __all__ = [
     # Broker interface
     "IBroker",
@@ -59,4 +79,16 @@ __all__ = [
     "RiskLimits",
     "RiskViolation",
     "RiskManager",
+    
+    # Live Trading
+    "LiveExecutionEngine",
+    "EngineState",
+    "EngineConfig",
+    "PositionSynchronizer",
+    "PositionDiscrepancy",
+    "ReconciliationReport",
+    "LivePnLTracker",
+    "TradeRecord",
+    "DailyPnL",
+    "LivePnLSnapshot",
 ]
