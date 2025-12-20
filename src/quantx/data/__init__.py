@@ -1,5 +1,18 @@
-"""Data module initialization"""
+"""
+Data Module for QuantX.
 
-from quantx.data.base import IDataProvider, IDataStore, MarketData, validate_ohlcv_dataframe
+Provides data providers, streaming, and instrument management.
+"""
 
-__all__ = ["IDataProvider", "IDataStore", "MarketData", "validate_ohlcv_dataframe"]
+from quantx.data.providers.base import IDataProvider
+from quantx.data.providers.yahoo import YahooFinanceProvider
+from quantx.data.streaming import ZerodhaWebSocket, LiveDataProvider
+from quantx.data.instruments import InstrumentManager
+
+__all__ = [
+    "IDataProvider",
+    "YahooFinanceProvider",
+    "ZerodhaWebSocket",
+    "LiveDataProvider",
+    "InstrumentManager",
+]
