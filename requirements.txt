@@ -42,3 +42,9 @@ tensorboard>=2.14.0
 # Broker Integration (Phase 3)
 kiteconnect>=4.0.0  # Zerodha Kite Connect API
 
+# API Backend (Phase 5)
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+websockets>=12.0
+python-multipart>=0.0.6  # For file uploads
+

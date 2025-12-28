@@ -31,6 +31,20 @@ def mock_event_bus():
     mock.publish = Mock()
     mock.subscribe = Mock()
     mock.unsubscribe = Mock()
+    mock.start = Mock()
+    mock.stop = Mock()
+    mock._running = False  # Add required state
+    
+    # Make start/stop actually update _running for realistic behavior
+    def start_side_effect():
+        mock._running = True
+    
+    def stop_side_effect():
+        mock._running = False
+    
+    mock.start.side_effect = start_side_effect
+    mock.stop.side_effect = stop_side_effect
+    
     return mock
 
 
