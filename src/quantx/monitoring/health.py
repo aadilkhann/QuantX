@@ -91,7 +91,7 @@ class HealthMonitor:
         
         if any(s == HealthStatus.UNHEALTHY for s in statuses):
             overall = HealthStatus.UNHEALTHY
-        elif any(s == Health Status.DEGRADED for s in statuses):
+        elif any(s == HealthStatus.DEGRADED for s in statuses):
             overall = HealthStatus.DEGRADED
         else:
             overall = HealthStatus.HEALTHY
