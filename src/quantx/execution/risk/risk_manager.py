@@ -427,6 +427,11 @@ class RiskManager:
             ])
         }
     
+    def get_status(self):
+        """Get current status (alias for get_risk_metrics)."""
+        return self.get_risk_metrics()
+
+
     def register_callback(self, event: str, callback: Callable):
         """
         Register a callback for an event.

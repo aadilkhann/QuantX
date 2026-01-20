@@ -30,8 +30,8 @@ xgboost = "^2.0.0"
 lightgbm = "^4.1.0"
 
 # Technical Analysis
-ta-lib = "^0.4.28"
-pandas-ta = "^0.3.14"
+# ta-lib = "^0.4.28"  # Optional - requires C library installation
+# pandas-ta = ">=0.3.14"  #  Already installed manually
 
 # Data Providers
 yfinance = "^0.2.28"

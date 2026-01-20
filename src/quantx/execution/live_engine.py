@@ -355,9 +355,22 @@ class LiveExecutionEngine:
             return
         
         self.signals_received += 1
-        signal_data = event.data
         
-        logger.info(f"📊 Signal received: {signal_data['action']} {signal_data['symbol']} x{signal_data['quantity']}")
+        # Extract signal data - handle wrapped signal
+        if 'signal' in event.data:
+            signal = event.data['signal']
+            signal_data = {
+                'action': signal.action,
+                'symbol': signal.symbol,
+                'quantity': signal.quantity,
+                'price': getattr(signal, 'price', None),
+                'timestamp': signal.timestamp,
+                'strategy': getattr(signal, 'strategy', None)
+            }
+        else:
+            signal_data = event.data
+        
+        logger.info(f"📊 Signal received: {signal_data.get('action')} {signal_data.get('symbol')} x{signal_data.get('quantity')}")
         
         # Convert signal to order
         order = self._signal_to_order(signal_data)

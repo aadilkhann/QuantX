@@ -116,17 +116,52 @@ class MockBroker(IBroker):
             if order.status in [OrderStatus.PENDING, OrderStatus.SUBMITTED]
         ]
     
-    def get_positions(self) -> Dict[str, Dict]:
+    def get_positions(self):
         """Get all positions."""
-        return self._positions.copy()
+        from quantx.execution.brokers.base import Position
+        positions = []
+        for symbol, pos_dict in self._positions.items():
+            if pos_dict.get("quantity", 0) != 0:
+                positions.append(Position(
+                    symbol=symbol,
+                    quantity=pos_dict["quantity"],
+                    average_price=pos_dict.get("average_price", 0.0),
+                    current_price=pos_dict.get("average_price", 0.0),
+                    market_value=pos_dict["quantity"] * pos_dict.get("average_price", 0.0),
+                    unrealized_pnl=0.0,
+                    realized_pnl=0.0
+                ))
+        return positions
     
-    def get_position(self, symbol: str) -> Optional[Dict]:
+    def get_position(self, symbol: str):
         """Get position for symbol."""
-        return self._positions.get(symbol)
+        from quantx.execution.brokers.base import Position
+        if symbol in self._positions and self._positions[symbol].get("quantity", 0) != 0:
+            pos_dict = self._positions[symbol]
+            return Position(
+                symbol=symbol,
+                quantity=pos_dict["quantity"],
+                average_price=pos_dict.get("average_price", 0.0),
+                current_price=pos_dict.get("average_price", 0.0),
+                market_value=pos_dict["quantity"] * pos_dict.get("average_price", 0.0),
+                unrealized_pnl=0.0,
+                realized_pnl=0.0
+            )
+        return None
     
-    def get_account(self) -> Dict:
+    def get_account(self):
         """Get account information."""
-        return self._account.copy()
+        from quantx.execution.brokers.base import Account
+        return Account(
+            account_id="mock_account",
+            cash=self._account.get("cash", 100000.0),
+            equity=self._account.get("equity", 100000.0),
+            buying_power=self._account.get("cash", 100000.0),
+            positions_value=0.0,
+            unrealized_pnl=0.0,
+            realized_pnl=0.0,
+            initial_capital=100000.0
+        )
     
     def get_quote(self, symbol: str) -> Dict:
         """Get quote for symbol."""
